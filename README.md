@@ -4,6 +4,8 @@
 
 En este repositorio esta disponible todo el material del taller realizado en el [DevFest Barcelona 2015](http://devfest.gdgbarcelona.com/).
 
+La finalidad del taller es proporcionar una introducción a Arduino, Android y a su comunicación por bluetooth.
+
 ### Contenido ###
 
 * presentacion: [Arduino, Bluetooth y Android](https://docs.google.com/presentation/d/18Uj5LVcgf4MFmLTSpW8qypzW9slujDzcJsBNE7zgnM0/edit?usp=sharing)
