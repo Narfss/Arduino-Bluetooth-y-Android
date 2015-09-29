@@ -29,7 +29,9 @@ int RX = 10;
 int TX = 11;
 SoftwareSerial bluetooth(RX, TX);
 int LED_PIN = 13;
-char serialData[2];
+char serialData[3];
+char ON[] = "ON"; 
+char OF[] = "OF";
 
 void setup() {
   bluetooth.begin(9600);
@@ -40,9 +42,9 @@ void loop() {
   int bufferSize = bluetooth.available();
   if (bufferSize == 2) {
     bluetooth.readBytes(serialData, bufferSize);
-    if (serialData == "ON") {
+    if (strcmp(serialData, ON) == 0) {
       digitalWrite(LED_PIN, HIGH);  
-    } else if (serialData == "OF") {
+    } else if (strcmp(serialData, OF) == 0) {
       digitalWrite(LED_PIN, LOW);
     }
   }
