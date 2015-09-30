@@ -22,17 +22,21 @@
  *
  * Contact: Francisco M Sirvent <narfss@gmail.com>
  */
-package com.fmsirvent.arduinobluetoothyandroid;
+package com.fmsirvent.arduinobluetoothyandroidextra;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -43,8 +47,11 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity {
     private static final String SPP_UUID = "00001101-0000-1000-8000-00805f9b34fb";
     private static final int SELECT_BT = 2;
+    private static final int ARDUINO_DATA = 3;
     private BluetoothDevice bluetoothDevice = null;
-    private OutputStream outputStream;
+    private ConnectedThread connectedThread = null;
+    private Handler handler = null;
+    private TextView hiTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +60,26 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, SelectBluetoothDeviceActivity.class);
         startActivityForResult(intent, SELECT_BT);
         configureSwitch();
+        configureHi();
+    }
+
+    private void configureHi() {
+        hiTextView = (TextView) findViewById(R.id.switch1);
+        handler = new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                switch (msg.what) {
+                    case ARDUINO_DATA:
+                        byte[] streamData = (byte[]) msg.obj;
+                        String streamString = new String(streamData, 0, msg.arg1);
+                        int visibility = (hiTextView.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
+                        hiTextView.setText(streamString);
+                        hiTextView.setVisibility(visibility);
+                        break;
+                }
+                return false;
+            }
+        });
     }
 
     private void configureSwitch() {
@@ -60,18 +87,14 @@ public class MainActivity extends AppCompatActivity {
         lightSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (outputStream != null) {
+                if (connectedThread != null) {
                     String outputData;
                     if (isChecked) {
                         outputData = "ON";
                     } else {
                         outputData = "OF";
                     }
-                    try {
-                        outputStream.write(outputData.getBytes());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    connectedThread.write(outputData);
                 }
             }
         });
@@ -96,7 +119,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             socket = bluetoothDevice.createRfcommSocketToServiceRecord(uuid);
             socket.connect();
-            outputStream = socket.getOutputStream();
+            connectedThread = new ConnectedThread(socket);
+            connectedThread.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,6 +129,36 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private class ConnectedThread extends Thread {
+        private InputStream inputStream;
+        private OutputStream outputStream;
+
+        public ConnectedThread(BluetoothSocket socket) {
+            try {
+                inputStream = socket.getInputStream();
+                outputStream = socket.getOutputStream();
+            } catch (IOException ignored) { }
+        }
+
+        public void run() {
+            byte[] buffer = new byte[2];
+
+            while (true) {
+                try {
+                    int bytes = inputStream.read(buffer);
+                    handler.obtainMessage(ARDUINO_DATA, bytes, -1, buffer).sendToTarget();
+                } catch (IOException e) {
+                    break;
+                }
+            }
+        }
+
+        public void write(String message) {
+            try {
+                outputStream.write(message.getBytes());
+            } catch (IOException ignored) { }
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

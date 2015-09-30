@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Arduino, Bluetooth y Android Extra</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_select_bluetooth_device">SelectBluetoothDeviceActivity</string>
+</resources>
