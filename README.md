@@ -8,7 +8,8 @@ La finalidad del taller es proporcionar una introducción a Arduino, Android y a
 
 ### Contenido ###
 
-* presentacion: [Arduino, Bluetooth y Android](https://docs.google.com/presentation/d/18Uj5LVcgf4MFmLTSpW8qypzW9slujDzcJsBNE7zgnM0/edit?usp=sharing)
+* presentación: Comunicación Android to Arduino [Arduino, Bluetooth y Android](https://docs.google.com/presentation/d/18Uj5LVcgf4MFmLTSpW8qypzW9slujDzcJsBNE7zgnM0/edit?usp=sharing)
+* presentación: Comunicación bidireccional [Arduino, Bluetooth y Android Extra](https://docs.google.com/presentation/d/17i4L167o5vdwiBYyPG7HabxNBSgV9GaoWXIIEmTEOZM/edit?usp=sharing)
 * arduino: sketch utilizados en en la presentacion
 * android: proyecto ejemplo en android
 
