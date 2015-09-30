@@ -33,6 +33,8 @@ int BUTTON_PIN = 2;
 char serialData[3];
 char ON[] = "ON"; 
 char OF[] = "OF";
+bool pressed = false;
+bool updateButton= false;
 
 void setup() {
   bluetooth.begin(9600);
@@ -42,8 +44,16 @@ void setup() {
 
 void loop() {
   int buttonState = digitalRead(BUTTON_PIN);
-  if (buttonState == 1) {
-    bluetooth.write("HI!");
+  if (buttonState == 1 && !updateButton) {
+    pressed = !pressed;
+    updateButton = true;
+  } else if (buttonState == 0 && updateButton) {
+    updateButton = false;
+    if (pressed) {
+      bluetooth.write("HI!"); 
+    } else {
+      bluetooth.write("Bye bye!");
+    }
   }
   int bufferSize = bluetooth.available();
   if (bufferSize == 2) {

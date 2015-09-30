@@ -27,13 +27,12 @@ package com.fmsirvent.arduinobluetoothyandroidextra;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -71,32 +70,30 @@ public class MainActivity extends AppCompatActivity {
                 if (msg.what == ARDUINO_DATA) {
                     byte[] streamData = (byte[]) msg.obj;
                     String streamString = new String(streamData, 0, msg.arg1);
-                    int visibility = (hiTextView.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
                     hiTextView.setText(streamString);
-                    hiTextView.setVisibility(visibility);
                 }
                 return false;
             }
         });
     }
 
- private void configureSwitch() {
-     Switch lightSwitch = (Switch) findViewById(R.id.switch1);
-     lightSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-         @Override
-         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-             if (connectedThread != null) {
-                 String outputData;
-                 if (isChecked) {
-                     outputData = "ON";
-                 } else {
-                     outputData = "OF";
+     private void configureSwitch() {
+         Switch lightSwitch = (Switch) findViewById(R.id.switch1);
+         lightSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+             @Override
+             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                 if (connectedThread != null) {
+                     String outputData;
+                     if (isChecked) {
+                         outputData = "ON";
+                     } else {
+                         outputData = "OF";
+                     }
+                     connectedThread.write(outputData);
                  }
-                 connectedThread.write(outputData);
              }
-         }
-     });
- }
+         });
+     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -139,12 +136,19 @@ private class ConnectedThread extends Thread {
     }
 
     public void run() {
-        byte[] buffer = new byte[2];
-
+        byte[] buffer = new byte[1];
+        String message = "";
         while (true) {
             try {
-                int bytes = inputStream.read(buffer);
-                handler.obtainMessage(ARDUINO_DATA, bytes, -1, buffer).sendToTarget();
+                inputStream.read(buffer);
+                message += new String(buffer);
+                if (message.contains("!")) {
+                    for (String partMessage : message.split("!")) {
+                        byte[] bytes1 = (partMessage + "!").getBytes();
+                        handler.obtainMessage(ARDUINO_DATA, bytes1.length, -1, bytes1).sendToTarget();
+                    }
+                    message = "";
+                }
             } catch (IOException e) {
                 break;
             }
