@@ -41,6 +41,10 @@ void setup() {
 }
 
 void loop() {
+  int buttonState = digitalRead(BUTTON_PIN);
+  if (buttonState == 1) {
+    bluetooth.write("HI!");
+  }
   int bufferSize = bluetooth.available();
   if (bufferSize == 2) {
     bluetooth.readBytes(serialData, bufferSize);
@@ -48,10 +52,6 @@ void loop() {
       digitalWrite(LED_PIN, HIGH);  
     } else if (strcmp(serialData, OF) == 0) {
       digitalWrite(LED_PIN, LOW);
-    }
-    int buttonState = digitalRead(BUTTON_PIN);
-    if (buttonState == 1) {
-      bluetooth.write("HI!");
     }
   }
   delay(20);

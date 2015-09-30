@@ -64,41 +64,39 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configureHi() {
-        hiTextView = (TextView) findViewById(R.id.switch1);
+        hiTextView = (TextView) findViewById(R.id.text1);
         handler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
-                switch (msg.what) {
-                    case ARDUINO_DATA:
-                        byte[] streamData = (byte[]) msg.obj;
-                        String streamString = new String(streamData, 0, msg.arg1);
-                        int visibility = (hiTextView.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
-                        hiTextView.setText(streamString);
-                        hiTextView.setVisibility(visibility);
-                        break;
+                if (msg.what == ARDUINO_DATA) {
+                    byte[] streamData = (byte[]) msg.obj;
+                    String streamString = new String(streamData, 0, msg.arg1);
+                    int visibility = (hiTextView.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
+                    hiTextView.setText(streamString);
+                    hiTextView.setVisibility(visibility);
                 }
                 return false;
             }
         });
     }
 
-    private void configureSwitch() {
-        Switch lightSwitch = (Switch) findViewById(R.id.switch1);
-        lightSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (connectedThread != null) {
-                    String outputData;
-                    if (isChecked) {
-                        outputData = "ON";
-                    } else {
-                        outputData = "OF";
-                    }
-                    connectedThread.write(outputData);
-                }
-            }
-        });
-    }
+ private void configureSwitch() {
+     Switch lightSwitch = (Switch) findViewById(R.id.switch1);
+     lightSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+         @Override
+         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+             if (connectedThread != null) {
+                 String outputData;
+                 if (isChecked) {
+                     outputData = "ON";
+                 } else {
+                     outputData = "OF";
+                 }
+                 connectedThread.write(outputData);
+             }
+         }
+     });
+ }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -129,36 +127,36 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class ConnectedThread extends Thread {
-        private InputStream inputStream;
-        private OutputStream outputStream;
+private class ConnectedThread extends Thread {
+    private InputStream inputStream;
+    private OutputStream outputStream;
 
-        public ConnectedThread(BluetoothSocket socket) {
+    public ConnectedThread(BluetoothSocket socket) {
+        try {
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
+        } catch (IOException ignored) { }
+    }
+
+    public void run() {
+        byte[] buffer = new byte[2];
+
+        while (true) {
             try {
-                inputStream = socket.getInputStream();
-                outputStream = socket.getOutputStream();
-            } catch (IOException ignored) { }
-        }
-
-        public void run() {
-            byte[] buffer = new byte[2];
-
-            while (true) {
-                try {
-                    int bytes = inputStream.read(buffer);
-                    handler.obtainMessage(ARDUINO_DATA, bytes, -1, buffer).sendToTarget();
-                } catch (IOException e) {
-                    break;
-                }
+                int bytes = inputStream.read(buffer);
+                handler.obtainMessage(ARDUINO_DATA, bytes, -1, buffer).sendToTarget();
+            } catch (IOException e) {
+                break;
             }
         }
-
-        public void write(String message) {
-            try {
-                outputStream.write(message.getBytes());
-            } catch (IOException ignored) { }
-        }
     }
+
+    public void write(String message) {
+        try {
+            outputStream.write(message.getBytes());
+        } catch (IOException ignored) { }
+    }
+}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
