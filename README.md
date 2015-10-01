@@ -1,6 +1,6 @@
 # Arduino, Bluetooth y Android #
 
-![](https://bytebucket.org/narfss/arduino-bluetooth-y-android/raw/83274506ceaea69a216e1b9e071e18e2552d3eb7/arduiblueandr.png?token=4f67415d32a567a569ec479758abecdae5a16b9d)
+![](https://raw.githubusercontent.com/Narfss/Arduino-Bluetooth-y-Android/master/arduiblueandr.png)
 
 En este repositorio esta disponible todo el material del taller realizado en el [DevFest Barcelona 2015](http://devfest.gdgbarcelona.com/).
 
